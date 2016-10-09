@@ -2,28 +2,74 @@ const fs = require("fs");
 const cheerio = require("cheerio");
 const directoryPath = "/Users/bee/Downloads/noventispayments-v5.webflow/"
 const mapFile = {
-  // page1: {
-    // title: "News-Article",
-    // attributes: [
-      // {
-        // selector: "header",
-        // data: [
-          // { block: "home_header" },
-          // { unique: "unique" },
-        // ],
-      // }
-    // ],
-  // },
+  news_article: {
+    filename: "news-article",
+    title: "News-Article",
+    attributes: [
+      {
+        selector: ".header",
+        data: {
+          "data-block": "news_article_header",
+          "data-unique": "test",
+        },
+      },
+      {
+        selector: ".post-selection",
+        data: {
+          "data-test": "test",
+        }
+      },
+    ],
+  },
   home: {
+    filename: "home",
     title: "Noventis V5",
     attributes: [
       {
-        selector: "header",
-        data: [
-          { block: "home_header" },
-          { unique: "unique" },
-        ],
-      }
+        selector: ".header",
+        data: {
+          "data-block": "home_header",
+          "data-unique": "test 2",
+        },
+      },
+      {
+        selector: ".mobile-menu",
+        data: {
+          "data-menu": "mainmenu",
+        }
+      },
+      {
+        selector: ".overlay .main-container h1",
+        data: {
+          "data-block-field": "title",
+          "data-type": "string",
+          "data-form-type": "string_textfield",
+          "data-format-type": "string",
+        }
+      },
+      {
+        selector: ".overlay .main-container .subtext",
+        data: {
+          "data-block-field": "body",
+          "data-type": "text_long",
+          "data-form-type": "text_textarea",
+          "data-format-type": "text_default",
+        }
+      },
+      {
+        selector: ".bg-image",
+        data: {
+          "data-block": "about",
+        }
+      },
+      {
+        selector: ".text-white",
+        data: {
+          "data-type": "string",
+          "data-form-type": "string_textfield",
+          "data-format-type": "string",
+        }
+      },
     ],
   }
 };
@@ -40,11 +86,11 @@ function readDirectoryAndGetFiles(dirPath, mapFile) {
       console.log(err);
     }
 
-    filterFilesAndGetHTMLFiles(files, dirPath, mapFile);
+    filterHTMLFiles(files, dirPath, mapFile);
   });
 }
 
-function filterFilesAndGetHTMLFiles(files, dirPath, mapFile) {
+function filterHTMLFiles(files, dirPath, mapFile) {
   files
     .filter(file => file.substr(-5) === ".html")
     .forEach(file => {
@@ -53,7 +99,7 @@ function filterFilesAndGetHTMLFiles(files, dirPath, mapFile) {
           console.log(err);
         }
 
-        return parseFileAndAddData(contents, mapFile);
+        parseFileAndAddData(contents, mapFile);
       });
     });
 }
@@ -75,17 +121,30 @@ function filterByMapFileAndAddData(mapFile, $) {
 }
 
 function addData($, page) {
-  console.log(page);
   page.attributes.forEach(attribute => {
-    $(`.${attribute.selector}`).data(...attribute.data);
-    console.log($(`.${attribute.selector}`).data());
+    const targetElement = $(attribute.selector);
+
+    if (Array.isArray(targetElement)) {
+      targetElement.forEach(element => {
+        element.attr(attribute.data);
+      });
+    } else {
+      targetElement.attr(attribute.data);
+    }
   });
 
-  // $('<div data-apple-color="red"></div>').data('apple-color')
-  // //=> 'red'
-
-  // var apple = $('.apple').data('kind', 'mac')
-  // apple.data('kind')
-  // //=> 'mac'
+  writeUpdatedHTML($, page);
 }
+
+function writeUpdatedHTML($, page) {
+  // TODO: Decide whether or not to ask for directoryPath or have users hardcode
+  const stream = fs.createWriteStream(`${directoryPath}${page.filename}.html`);
+
+  stream.once('open', function(fd) {
+    var html = $.html();
+
+    stream.end(html);
+  });
+}
+
 
