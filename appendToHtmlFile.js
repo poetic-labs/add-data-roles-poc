@@ -1,7 +1,7 @@
 const fs = require("fs");
 const cheerio = require("cheerio");
 const directoryPath = "/Users/bee/Downloads/noventispayments-v5.webflow/"
-const mapFile = require("./map-file.js");
+const mapFile = require("./map-file/index.js");
 
 appendDataRolesToHTML(directoryPath, mapFile);
 
@@ -75,5 +75,4 @@ function writeUpdatedHTML($, page) {
     stream.end(html);
   });
 }
-
 
