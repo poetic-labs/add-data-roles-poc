@@ -1,3 +1,5 @@
+const data = require("./data-constants.js");
+
 module.exports = {
   news_article: {
     filename: "news-article",

@@ -1,7 +1,6 @@
 const fs = require("fs");
 const cheerio = require("cheerio");
 const directoryPath = "/Users/bee/Downloads/noventispayments-v5.webflow/"
-const data = require("./data-constants.js");
 const mapFile = require("./map-file.js");
 
 appendDataRolesToHTML(directoryPath, mapFile);
