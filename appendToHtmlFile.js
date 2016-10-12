@@ -1,6 +1,8 @@
 const fs = require("fs");
 const cheerio = require("cheerio");
 const directoryPath = "/Users/bee/Downloads/noventispayments-v5.webflow/"
+const data = require("./data-constants.js");
+
 const mapFile = {
   news_article: {
     filename: "news-article",
@@ -65,9 +67,9 @@ const mapFile = {
       {
         selector: ".text-white",
         data: {
-          "data-type": "string",
-          "data-form-type": "string_textfield",
-          "data-format-type": "string",
+          "data-type": "form",
+          "data-form-type": "test",
+          "data-format-type": "test",
         }
       },
     ],
