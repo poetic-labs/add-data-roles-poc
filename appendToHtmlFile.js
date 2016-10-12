@@ -1,7 +1,8 @@
 const fs = require("fs");
 const cheerio = require("cheerio");
-const directoryPath = "/Users/bee/Downloads/noventispayments-v5.webflow/"
-const mapFile = require("./map-file/index.js");
+// Refactor to ask for these next two paths
+const directoryPath = "/Users/bee/poetic/jones/webflow/";
+const mapFile = require("/Users/bee/poetic/drupal/jones/map-file/index.js");
 
 appendDataRolesToHTML(directoryPath, mapFile);
 
