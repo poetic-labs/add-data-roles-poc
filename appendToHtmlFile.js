@@ -1,13 +1,15 @@
 const fs = require("fs");
+const path = require("path");
 const cheerio = require("cheerio");
 // Refactor to ask for these next two paths
-const directoryPath = "/Users/bee/poetic/drupal/jones/webflow/";
-const mapFile = require("/Users/bee/poetic/drupal/jones/map-file/index.js");
+const directoryPath = "/Users/juancubeddu/work/jones-company/webflow/";
+const mapFile = require("/Users/juancubeddu/work/jones-company/map-file/index.js");
 
 appendDataRolesToHTML(directoryPath, mapFile);
 
 function appendDataRolesToHTML (dirPath, mapFile) {
-  readDirectoryAndGetFiles(dirPath, mapFile);
+  // readDirectoryAndGetFiles(dirPath, mapFile);
+  allHtmlFiles(dirPath,'.html', mapFile);
 }
 
 function readDirectoryAndGetFiles(dirPath, mapFile) {
@@ -16,7 +18,8 @@ function readDirectoryAndGetFiles(dirPath, mapFile) {
       console.log(err);
     }
 
-    filterHTMLFiles(files, dirPath, mapFile);
+    // filterHTMLFiles(files, dirPath, mapFile);
+    // allHtmlFiles(dirPath,'.html', mapFile);
   });
 }
 
@@ -33,6 +36,32 @@ function filterHTMLFiles(files, dirPath, mapFile) {
       });
     });
 }
+function allHtmlFiles(dirPath, filter, mapFile){
+    // console.log('Starting from dir '+dirPath+'/');
+    if (!fs.existsSync(dirPath)){
+        console.log("no dir ",dirPath);
+        return;
+    }
+
+    var files=fs.readdirSync(dirPath);
+    for(var i=0;i<files.length;i++){
+        var filename=path.join(dirPath,files[i]);
+        var stat = fs.lstatSync(filename);
+        if (stat.isDirectory()){
+            allHtmlFiles(filename,filter, mapFile); //recurse
+        }
+        else if (filename.indexOf(filter)>=0) {
+            console.log('-- found: ',filename);
+           fs.readFile(filename, "utf-8", (err, contents) => {
+        if (err) {
+          console.log(err);
+        }
+
+        parseFileAndAddData(contents, mapFile);
+      });
+        };
+    };
+};
 
 function parseFileAndAddData(contents, mapFile) {
   const $ = cheerio.load(contents);
