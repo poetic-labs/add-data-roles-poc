@@ -1,12 +1,14 @@
-// TODO: set up env file for mapFile and directoryPath;
 // TODO: decide how to limit mapFile and directoryPath scope. Should they be
 // passed down through each function in case we separate this file?
+
+require('dotenv').config();
 
 const fs = require("fs");
 const path = require("path");
 const cheerio = require("cheerio");
-const directoryPath = "/Users/bee/poetic/drupal/jones/webflow/";
-const mapFile = require("/Users/bee/poetic/drupal/jones/map-file/index.js");
+const directoryPath = process.env.DIRECTORY_PATH;
+const mapFilePath = process.env.MAP_FILE_PATH;
+const mapFile = require(mapFilePath);
 
 appendDataRolesToHTML(directoryPath, mapFile);
 
