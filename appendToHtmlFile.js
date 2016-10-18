@@ -1,66 +1,61 @@
+// TODO: set up env file for mapFile and directoryPath;
+// TODO: decide how to limit mapFile and directoryPath scope. Should they be
+// passed down through each function in case we separate this file?
+
 const fs = require("fs");
 const path = require("path");
 const cheerio = require("cheerio");
-// Refactor to ask for these next two paths
-const directoryPath = "/Users/juancubeddu/work/jones-company/webflow/";
-const mapFile = require("/Users/juancubeddu/work/jones-company/map-file/index.js");
+const directoryPath = "/Users/bee/poetic/drupal/jones/webflow/";
+const mapFile = require("/Users/bee/poetic/drupal/jones/map-file/index.js");
 
 appendDataRolesToHTML(directoryPath, mapFile);
 
-function appendDataRolesToHTML (dirPath, mapFile) {
-  // readDirectoryAndGetFiles(dirPath, mapFile);
-  allHtmlFiles(dirPath,'.html', mapFile);
+function appendDataRolesToHTML(dirPath, mapFile) {
+  if (!fs.existsSync(dirPath)){
+    return console.log("Could not find directory at ", dirPath);
+  }
+
+  const HTMLFiles = [];
+
+  getHTMLFiles(HTMLFiles, dirPath);
+
+  parseHTMLFiles(HTMLFiles, mapFile);
 }
 
-function readDirectoryAndGetFiles(dirPath, mapFile) {
-  fs.readdir(dirPath, (err, files) => {
+function getHTMLFiles(HTMLFiles, dirPath) {
+  const files = readDirectoryAndGetFiles(dirPath);
+
+  files.forEach(file => {
+    const fileName = path.join(dirPath, file);
+
+    if (file.substr(-5) === ".html") {
+      HTMLFiles.push(fileName);
+    } else {
+      const stat = fs.lstatSync(fileName);
+
+      if (stat.isDirectory()){
+        getHTMLFiles(HTMLFiles, fileName);
+      }
+    }
+  });
+};
+
+function readDirectoryAndGetFiles(dirPath) {
+  return fs.readdirSync(dirPath);
+}
+
+function parseHTMLFiles(HTMLFiles, mapFile) {
+  HTMLFiles.forEach(file => readAndParseFile(file, mapFile));
+};
+
+function readAndParseFile(file, mapFile){
+  fs.readFile(file, "utf-8", (err, contents) => {
     if (err) {
       console.log(err);
     }
 
-    // filterHTMLFiles(files, dirPath, mapFile);
-    // allHtmlFiles(dirPath,'.html', mapFile);
+    parseFileAndAddData(contents, mapFile);
   });
-}
-
-function filterHTMLFiles(files, dirPath, mapFile) {
-  files
-    .filter(file => file.substr(-5) === ".html")
-    .forEach(file => {
-      fs.readFile(`${dirPath}${file}`, "utf-8", (err, contents) => {
-        if (err) {
-          console.log(err);
-        }
-
-        parseFileAndAddData(contents, mapFile);
-      });
-    });
-}
-function allHtmlFiles(dirPath, filter, mapFile){
-    // console.log('Starting from dir '+dirPath+'/');
-    if (!fs.existsSync(dirPath)){
-        console.log("no dir ",dirPath);
-        return;
-    }
-
-    var files=fs.readdirSync(dirPath);
-    for(var i=0;i<files.length;i++){
-        var filename=path.join(dirPath,files[i]);
-        var stat = fs.lstatSync(filename);
-        if (stat.isDirectory()){
-            allHtmlFiles(filename,filter, mapFile); //recurse
-        }
-        else if (filename.indexOf(filter)>=0) {
-            console.log('-- found: ',filename);
-           fs.readFile(filename, "utf-8", (err, contents) => {
-        if (err) {
-          console.log(err);
-        }
-
-        parseFileAndAddData(contents, mapFile);
-      });
-        };
-    };
 };
 
 function parseFileAndAddData(contents, mapFile) {
@@ -96,7 +91,6 @@ function addData($, page) {
 }
 
 function writeUpdatedHTML($, page) {
-  // TODO: Decide whether or not to ask for directoryPath or have users hardcode
   const stream = fs.createWriteStream(`${directoryPath}${page.filename}.html`);
 
   stream.once('open', function(fd) {
